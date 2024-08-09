@@ -4,9 +4,7 @@ import in.starhealth.employee_backend.exception.ResourceNotFoundException;
 import in.starhealth.employee_backend.model.Employee;
 import in.starhealth.employee_backend.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -69,8 +67,7 @@ public class EmployeeController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @RequestMapping("students")
-    @GetMapping()
+    @GetMapping("students")
     public ResponseEntity<Object> getStudents() {
 
         String url = "http://192.168.113.68:9050/students/";
@@ -83,4 +80,38 @@ public class EmployeeController {
         );
     }
 
+    //Payload
+    /*
+    * course
+    * fee
+    * studentName
+    *
+    * */
+
+    @PostMapping("students")
+    public ResponseEntity<Object> createStudent() {
+
+        String url = "http://192.168.113.68:9050/students/new";
+
+        // Created the JSON payload as a String
+        String payload = "{"
+                + "\"course\": \"Mathematics\","
+                + "\"fee\": 500,"
+                + "\"studentName\": \"John Doe\""
+                + "}";
+
+        //Created HttpHeaders and set Content-Type to application/json
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        //Created HttpEntity with JSON payload and headers
+        HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                requestEntity,
+                Object.class
+        );
+    }
 }
