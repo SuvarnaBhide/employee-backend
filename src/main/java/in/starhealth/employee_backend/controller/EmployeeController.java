@@ -4,14 +4,16 @@ import in.starhealth.employee_backend.exception.ResourceNotFoundException;
 import in.starhealth.employee_backend.model.Employee;
 import in.starhealth.employee_backend.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/employees")
+@RequestMapping("employees")
 public class EmployeeController {
 
     @Autowired
@@ -63,4 +65,22 @@ public class EmployeeController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @RequestMapping("students")
+    @GetMapping()
+    public ResponseEntity<Object> getStudents() {
+
+        String url = "http://192.168.113.68:9050/students/";
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                Object.class
+        );
+    }
+
 }

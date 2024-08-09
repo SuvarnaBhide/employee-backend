@@ -6,8 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
+@EnableFeignClients
 public class EmployeeBackendApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
@@ -38,5 +42,10 @@ public class EmployeeBackendApplication implements CommandLineRunner {
 		employee3.setEmailID("suvarna.bhide@starhealth.in");
 		employeeRepository.save(employee3);
 
+	}
+
+	@Bean
+	public RestTemplate restTemplate () {
+		return new RestTemplate();
 	}
 }
