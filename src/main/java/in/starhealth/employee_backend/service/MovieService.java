@@ -38,6 +38,25 @@ public class MovieService {
         );
     }
 
+    public ResponseEntity<Object> updateMovie(long id) throws IOException {
+        String urlWithId = String.format("%s/%d", url, id); // Format the URL with the ID
+
+        // Create the JSON payload as a String
+        String payload = loadPayload();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
+
+        return restTemplate.exchange(
+                urlWithId,
+                HttpMethod.PUT,
+                requestEntity,
+                Object.class
+        );
+    }
+
     public ResponseEntity<Object> createMovie() throws IOException {
 
         // Create the JSON payload as a String

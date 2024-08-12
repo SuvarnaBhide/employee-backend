@@ -26,8 +26,13 @@ public class MovieController {
         return movieService.getMovies();
     }
 
+    @PutMapping("{ID}")
+    public ResponseEntity<Object> updateMovie(@PathVariable long ID) throws IOException {
+        return movieService.updateMovie(ID);
+    }
+
     @PostMapping()
-    public ResponseEntity<Object> createMovies() throws IOException {
+    public ResponseEntity<Object> createMovie() throws IOException {
         return movieService.createMovie();
     }
 
