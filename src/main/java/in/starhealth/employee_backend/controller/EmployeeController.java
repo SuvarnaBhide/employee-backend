@@ -3,6 +3,8 @@ package in.starhealth.employee_backend.controller;
 import in.starhealth.employee_backend.exception.ResourceNotFoundException;
 import in.starhealth.employee_backend.model.Employee;
 import in.starhealth.employee_backend.repository.EmployeeRepository;
+import in.starhealth.employee_backend.service.EmployeeService;
+import in.starhealth.employee_backend.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -15,103 +17,51 @@ import java.util.List;
 public class EmployeeController {
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private EmployeeService employeeService;
+
+    @Autowired
+    private StudentService studentService;
 
     @GetMapping
     public List<Employee> getAllEmployees(){
-        return employeeRepository.findAll();
+        return employeeService.getAllEmployees();
     }
 
     //build create employee REST API
     @PostMapping
     public Employee createEmployee(@RequestBody Employee employee) {
-        return employeeRepository.save(employee);
+        return employeeService.createEmployee(employee);
     }
 
     // build employee by id REST API
     @GetMapping("{ID}")
-    public ResponseEntity<Employee> getEmployeeByID(@PathVariable long ID) {
-        Employee employee = employeeRepository.findById(ID).
-                orElseThrow( () -> new ResourceNotFoundException("Employee does not exist with id " + ID));
-
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable long ID) {
+        Employee employee = employeeService.getEmployeeById(ID);
         return ResponseEntity.ok(employee);
     }
 
     // build update employee REST API
     @PutMapping("{ID}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable long ID, @RequestBody Employee employeeDetails){
-        Employee updateEmployee = employeeRepository.findById(ID)
-                .orElseThrow( () ->  new ResourceNotFoundException("Employee does not exist with id " + ID));
-
-        updateEmployee.setFirstName(employeeDetails.getFirstName());
-        updateEmployee.setLastName(employeeDetails.getLastName());
-        updateEmployee.setEmailID(employeeDetails.getEmailID());
-
-        employeeRepository.save(updateEmployee);
-        return ResponseEntity.ok(updateEmployee);
+    public ResponseEntity<Employee> updateEmployee(@PathVariable long ID, @RequestBody Employee employeeDetails) {
+        Employee updatedEmployee = employeeService.updateEmployee(ID, employeeDetails);
+        return ResponseEntity.ok(updatedEmployee);
     }
 
     //build delete employee REST API
     @DeleteMapping("{ID}")
-    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable long ID){
-
-        Employee employee = employeeRepository.findById(ID)
-                .orElseThrow( () -> new ResourceNotFoundException("Employee does not exist with id " + ID));
-
-
-        employeeRepository.delete(employee);
-
+    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable long ID) {
+        employeeService.deleteEmployee(ID);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Autowired
-    private RestTemplate restTemplate;
+//    @GetMapping("students")
+//    public ResponseEntity<Object> getStudents() {
+//        return studentService.getStudents();
+//    }
 
-    @GetMapping("students")
-    public ResponseEntity<Object> getStudents() {
+//    @PostMapping("students")
+//    public ResponseEntity<Object> createStudent(@RequestBody String payload) {
+//        return studentService.createStudent(payload);
+//    }
 
-        String url = "http://192.168.113.68:9050/students/";
-
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                Object.class
-        );
-    }
-
-    //Payload
-    /*
-    * course
-    * fee
-    * studentName
-    *
-    * */
-
-    @PostMapping("students")
-    public ResponseEntity<Object> createStudent() {
-
-        String url = "http://192.168.113.68:9050/students/new";
-
-        // Created the JSON payload as a String
-        String payload = "{"
-                + "\"course\": \"Mathematics\","
-                + "\"fee\": 500,"
-                + "\"studentName\": \"John Doe\""
-                + "}";
-
-        //Created HttpHeaders and set Content-Type to application/json
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        //Created HttpEntity with JSON payload and headers
-        HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
-
-        return restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                Object.class
-        );
-    }
 }

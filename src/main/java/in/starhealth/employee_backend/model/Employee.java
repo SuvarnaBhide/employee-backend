@@ -9,7 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name="employee")
 public class Employee {
@@ -24,7 +23,7 @@ public class Employee {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email")
     private String emailID;
 
 }
