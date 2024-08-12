@@ -33,9 +33,6 @@ public class ScheduledTaskService {
     @Value("${myapp.external.movie_service.url}")
     private String url;
 
-    @Value("${myapp.job.frequency}")
-    private String frequency;
-
     public String loadPayload(int mid) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:payloads/moviePayload.json");
         try (InputStream inputStream = resource.getInputStream()) {
@@ -45,7 +42,6 @@ public class ScheduledTaskService {
             return payloadTemplate.replace("${mid}", String.valueOf(mid));
         }
     }
-
 
     @Scheduled(cron = "${myapp.job.frequency}")
     public void sendPostRequest() {
