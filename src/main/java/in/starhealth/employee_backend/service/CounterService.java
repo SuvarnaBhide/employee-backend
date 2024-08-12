@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class CounterService {
 
-    private final AtomicInteger midCounter = new AtomicInteger(100);
+    private final AtomicInteger midCounter = new AtomicInteger(200);
 
     public int getNextMid() {
         return midCounter.getAndIncrement();

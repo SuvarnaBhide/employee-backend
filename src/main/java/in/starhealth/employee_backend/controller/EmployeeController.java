@@ -2,13 +2,13 @@ package in.starhealth.employee_backend.controller;
 
 import in.starhealth.employee_backend.exception.ResourceNotFoundException;
 import in.starhealth.employee_backend.model.Employee;
-import in.starhealth.employee_backend.repository.EmployeeRepository;
 import in.starhealth.employee_backend.service.EmployeeService;
-import in.starhealth.employee_backend.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -19,12 +19,13 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @Autowired
-    private StudentService studentService;
-
+    // Updated getAllEmployees method to handle pagination
     @GetMapping
-    public List<Employee> getAllEmployees(){
-        return employeeService.getAllEmployees();
+    public ResponseEntity<Page<Employee>> getAllEmployees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size) {
+        Page<Employee> employees = employeeService.getAllEmployees(page, size);
+        return ResponseEntity.ok(employees);
     }
 
     //build create employee REST API
@@ -53,15 +54,4 @@ public class EmployeeController {
         employeeService.deleteEmployee(ID);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-//    @GetMapping("students")
-//    public ResponseEntity<Object> getStudents() {
-//        return studentService.getStudents();
-//    }
-
-//    @PostMapping("students")
-//    public ResponseEntity<Object> createStudent(@RequestBody String payload) {
-//        return studentService.createStudent(payload);
-//    }
-
 }
