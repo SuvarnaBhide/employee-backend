@@ -21,12 +21,18 @@ public class MovieService {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    @Autowired
+    private CounterService counterService;
+
     @Value("${myapp.external.movie_service.url}")
     String url;
 
-    public String loadPayload() throws IOException {
+    public String loadPayload(int mid) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:payloads/moviePayload.json");
-        return new String(Files.readAllBytes(Paths.get(resource.getURI())));
+        String payloadTemplate = new String(Files.readAllBytes(Paths.get(resource.getURI())));
+
+        // Replace mid placeholder with the actual value
+        return payloadTemplate.replace("${mid}", String.valueOf(mid));
     }
 
     public ResponseEntity<Object> getMovies() {
@@ -38,29 +44,32 @@ public class MovieService {
         );
     }
 
-    public ResponseEntity<Object> updateMovie(long id) throws IOException {
-        String urlWithId = String.format("%s/%d", url, id); // Format the URL with the ID
-
-        // Create the JSON payload as a String
-        String payload = loadPayload();
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
-
-        return restTemplate.exchange(
-                urlWithId,
-                HttpMethod.PUT,
-                requestEntity,
-                Object.class
-        );
-    }
+//    public ResponseEntity<Object> updateMovie(long id) throws IOException {
+//        String urlWithId = String.format("%s/%d", url, id); // Format the URL with the ID
+//
+//        // Create the JSON payload as a String
+//        String payload = loadPayload();
+//
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+//
+//        HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
+//
+//        return restTemplate.exchange(
+//                urlWithId,
+//                HttpMethod.PUT,
+//                requestEntity,
+//                Object.class
+//        );
+//    }
 
     public ResponseEntity<Object> createMovie() throws IOException {
 
-        // Create the JSON payload as a String
-        String payload = loadPayload();
+        // Get the next mid value from CounterService
+        int mid = counterService.getNextMid();
+
+        // Load payload with updated mid
+        String payload = loadPayload(mid);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

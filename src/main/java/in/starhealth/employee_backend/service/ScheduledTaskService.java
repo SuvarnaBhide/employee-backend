@@ -25,11 +25,11 @@ public class ScheduledTaskService {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    @Autowired
+    private CounterService counterService;
+
     @Value("${myapp.external.movie_service.url}")
     private String url;
-
-    // AtomicInteger for thread-safe incrementing
-    private final AtomicInteger midCounter = new AtomicInteger(20);
 
     public String loadPayload(int mid) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:payloads/moviePayload.json");
@@ -41,8 +41,8 @@ public class ScheduledTaskService {
 
     @Scheduled(cron = "0/5 * * * * *")
     public void sendPostRequest() throws IOException {
-        // Increment mid
-        int mid = midCounter.getAndIncrement();
+        // Get the next mid value from CounterService
+        int mid = counterService.getNextMid();
 
         // Load payload with updated mid
         String payload = loadPayload(mid);
