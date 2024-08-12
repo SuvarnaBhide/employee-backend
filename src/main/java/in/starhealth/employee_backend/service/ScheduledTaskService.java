@@ -10,6 +10,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -31,37 +33,51 @@ public class ScheduledTaskService {
     @Value("${myapp.external.movie_service.url}")
     private String url;
 
+    @Value("${myapp.job.frequency}")
+    private String frequency;
+
     public String loadPayload(int mid) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:payloads/moviePayload.json");
-        String payloadTemplate = new String(Files.readAllBytes(Paths.get(resource.getURI())));
+        try (InputStream inputStream = resource.getInputStream()) {
+            String payloadTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-        // Replace mid placeholder with the actual value
-        return payloadTemplate.replace("${mid}", String.valueOf(mid));
+            // Replace mid placeholder with the actual value
+            return payloadTemplate.replace("${mid}", String.valueOf(mid));
+        }
     }
 
-    @Scheduled(cron = "0/5 * * * * *")
-    public void sendPostRequest() throws IOException {
-        // Get the next mid value from CounterService
-        int mid = counterService.getNextMid();
 
-        // Load payload with updated mid
-        String payload = loadPayload(mid);
+    @Scheduled(cron = "${myapp.job.frequency}")
+    public void sendPostRequest() {
+        try {
+            // Get the next mid value from CounterService
+            int mid = counterService.getNextMid();
 
-        // Create HttpHeaders and set Content-Type to application/json
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            // Load payload with updated mid
+            String payload = loadPayload(mid);
 
-        // Create HttpEntity with JSON payload and headers
-        HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
+            // Create HttpHeaders and set Content-Type to application/json
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        // Make the POST request and get the response
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
+            // Create HttpEntity with JSON payload and headers
+            HttpEntity<String> requestEntity = new HttpEntity<>(payload, httpHeaders);
 
-        System.out.println("Response: " + response.getBody());
+            // Make the POST request and get the response
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
+
+            System.out.println("Response: " + response.getBody());
+        } catch (IOException e) {
+            System.err.println("Error loading payload: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error during scheduled task: " + e.getMessage());
+        }
     }
+
+
 }
