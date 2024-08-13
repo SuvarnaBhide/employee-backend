@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: employee-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/employeedb?useSSL=false
+    username: root
+    password: cycle123
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+
+myapp:
+  external:
+    student_service:
+      url: http://192.168.113.68:9050/students/
+    movie_service:
+      url: http://192.168.252.141:8080/api/movie/
+  job:
+    frequency: "0/5 * * * * *"
