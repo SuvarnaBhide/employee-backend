@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.BeanUtils;
 
 @Getter
 @Setter
@@ -28,14 +29,18 @@ public class EmployeeEntity {
     @Column(name = "email")
     private String emailID;
 
-    // Convert Entity to POJO
+    // Convert Entity to POJO using BeanUtils
     public EmployeePOJO toPOJO() {
-        return new EmployeePOJO(id, firstName, lastName, emailID);
+        EmployeePOJO pojo = new EmployeePOJO();
+        BeanUtils.copyProperties(this, pojo);
+        return pojo;
     }
 
-    // Create an Entity from POJO
+    // Create an Entity from POJO using BeanUtils
     public static EmployeeEntity fromPOJO(EmployeePOJO pojo) {
-        return new EmployeeEntity(pojo.getId(), pojo.getFirstName(), pojo.getLastName(), pojo.getEmailID());
+        EmployeeEntity entity = new EmployeeEntity();
+        BeanUtils.copyProperties(pojo, entity);
+        return entity;
     }
 }
 
