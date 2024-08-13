@@ -10,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class EmployeeService {
 
@@ -17,10 +20,12 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
 
     // Fetch all employees with pagination and convert to POJO
-    public Page<EmployeePOJO> getAllEmployees(int page, int size) {
+    public List<EmployeePOJO> getAllEmployees(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<EmployeeEntity> employeeEntities = employeeRepository.findAll(pageable);
-        return employeeEntities.map(EmployeeEntity::toPOJO);
+
+        //Convert entity to POJO and return it
+        return employeeEntities.stream().map(EmployeeEntity::toPOJO).collect(Collectors.toList());
     }
 
     // Create a new employee and convert to POJO

@@ -19,4 +19,4 @@ myapp:
     movie_service:
       url: http://192.168.252.141:8080/api/movie/
   job:
-    frequency: "0/5 * * * * *"
+    frequency: "0 0 */5 * * *"

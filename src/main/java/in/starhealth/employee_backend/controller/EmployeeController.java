@@ -4,10 +4,11 @@ import in.starhealth.employee_backend.model.pojo.EmployeePOJO;
 import in.starhealth.employee_backend.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("employees")
@@ -18,10 +19,10 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @GetMapping
-    public ResponseEntity<Page<EmployeePOJO>> getAllEmployees(
+    public ResponseEntity<List<EmployeePOJO>> getAllEmployees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size) {
-        Page<EmployeePOJO> employees = employeeService.getAllEmployees(page, size);
+        List<EmployeePOJO> employees = employeeService.getAllEmployees(page, size);
         return ResponseEntity.ok(employees);
     }
 
