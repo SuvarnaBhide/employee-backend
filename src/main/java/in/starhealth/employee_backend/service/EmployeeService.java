@@ -1,5 +1,6 @@
 package in.starhealth.employee_backend.service;
 
+import in.starhealth.employee_backend.dto.CustomPagedResponse;
 import in.starhealth.employee_backend.exception.ResourceNotFoundException;
 import in.starhealth.employee_backend.model.entity.EmployeeEntity;
 import in.starhealth.employee_backend.model.pojo.EmployeePOJO;
@@ -20,12 +21,21 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
 
     // Fetch all employees with pagination and convert to POJO
-    public List<EmployeePOJO> getAllEmployees(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public CustomPagedResponse<EmployeePOJO> getAllEmployees(int page, int size) {
+        Pageable pageable = PageRequest.of(page-1, size);
         Page<EmployeeEntity> employeeEntities = employeeRepository.findAll(pageable);
 
-        //Convert entity to POJO and return it
-        return employeeEntities.stream().map(EmployeeEntity::toPOJO).collect(Collectors.toList());
+        List<EmployeePOJO> employeePOJOs = employeeEntities.stream()
+                .map(EmployeeEntity::toPOJO)
+                .toList();
+
+        return new CustomPagedResponse<>(
+                employeeEntities.getTotalElements(),
+                employeeEntities.getTotalPages(),
+                employeeEntities.getNumberOfElements(),
+                employeeEntities.getNumber() + 1,
+                employeePOJOs
+        );
     }
 
     // Create a new employee and convert to POJO
