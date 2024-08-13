@@ -5,6 +5,7 @@ import in.starhealth.employee_backend.exception.ResourceNotFoundException;
 import in.starhealth.employee_backend.model.entity.EmployeeEntity;
 import in.starhealth.employee_backend.model.pojo.EmployeePOJO;
 import in.starhealth.employee_backend.repository.EmployeeRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,12 +23,16 @@ public class EmployeeService {
 
     // Fetch all employees with pagination and convert to POJO
     public CustomPagedResponse<EmployeePOJO> getAllEmployees(int page, int size) {
-        Pageable pageable = PageRequest.of(page-1, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
         Page<EmployeeEntity> employeeEntities = employeeRepository.findAll(pageable);
 
         List<EmployeePOJO> employeePOJOs = employeeEntities.stream()
-                .map(EmployeeEntity::toPOJO)
-                .toList();
+                .map(entity -> {
+                    EmployeePOJO pojo = new EmployeePOJO();
+                    BeanUtils.copyProperties(entity, pojo);
+                    return pojo;
+                })
+                .collect(Collectors.toList());
 
         return new CustomPagedResponse<>(
                 employeeEntities.getTotalElements(),
@@ -40,16 +45,24 @@ public class EmployeeService {
 
     // Create a new employee and convert to POJO
     public EmployeePOJO createEmployee(EmployeePOJO employeePOJO) {
-        EmployeeEntity employeeEntity = EmployeeEntity.fromPOJO(employeePOJO);
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        BeanUtils.copyProperties(employeePOJO, employeeEntity);
         EmployeeEntity savedEntity = employeeRepository.save(employeeEntity);
-        return savedEntity.toPOJO();
+
+        EmployeePOJO savedEmployeePOJO = new EmployeePOJO();
+        BeanUtils.copyProperties(savedEntity, savedEmployeePOJO);
+        return savedEmployeePOJO;
     }
 
     // Get employee by ID and convert to POJO
     public EmployeePOJO getEmployeeById(long id) {
         EmployeeEntity employeeEntity = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee does not exist with id " + id));
-        return employeeEntity.toPOJO();
+
+        EmployeePOJO employeePOJO = new EmployeePOJO();
+        BeanUtils.copyProperties(employeeEntity, employeePOJO);
+
+        return employeePOJO;
     }
 
     // Update employee details and convert to POJO
@@ -57,12 +70,15 @@ public class EmployeeService {
         EmployeeEntity existingEmployee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee does not exist with id " + id));
 
-        existingEmployee.setFirstName(employeeDetails.getFirstName());
-        existingEmployee.setLastName(employeeDetails.getLastName());
-        existingEmployee.setEmailID(employeeDetails.getEmailID());
+        // Copy properties from POJO to existing entity
+        BeanUtils.copyProperties(employeeDetails, existingEmployee, "id"); // Exclude the ID field
 
         EmployeeEntity updatedEntity = employeeRepository.save(existingEmployee);
-        return updatedEntity.toPOJO();
+
+        EmployeePOJO updatedEmployeePOJO = new EmployeePOJO();
+        BeanUtils.copyProperties(updatedEntity, updatedEmployeePOJO);
+
+        return updatedEmployeePOJO;
     }
 
     // Delete employee by ID
